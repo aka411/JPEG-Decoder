@@ -1,0 +1,26 @@
+<html>
+       <head><title>Test Bed</title></head>
+        <body>
+            <canvas id = "canvas"  width = "1000"  height = "1000"></canvas>
+            <canvas id = "canvasPara" width = "900" height = "900"></canvas>
+       <script src="./script/jpeg (v1.2).js"></script>       
+        <script>
+        
+         // const url ='./test/lena.jpg';
+         // const url = './test/jpeg400jfif.jpg';
+         // const url = './test/tapa.jpg';
+         // const url = './test/subSampled/test1.jpg';
+          const url = './test/test2g.jpg';
+         // const url = './test/size/T(512_356).jpg';
+            const canvas = document.getElementById("canvas").getContext("2d");
+            const ctx = [canvas];
+            
+              jpeg(url,ctx);
+                 
+                
+                
+        </script>     
+              
+       </body>
+       
+</html>
