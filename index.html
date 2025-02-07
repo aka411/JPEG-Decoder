@@ -1,26 +1,161 @@
 <html>
-       <head><title>Test Bed</title></head>
-        <body>
-            <canvas id = "canvas"  width = "1000"  height = "1000"></canvas>
-            <canvas id = "canvasPara" width = "900" height = "900"></canvas>
-       <script src="./script/jpeg (v1.2).js"></script>       
+       <head><title>Jpeg Decoder</title>
+ <script src="./src/jpeg.js"></script>
+       </head>
+
+        <body bgcolor='Grey'>
+
+
+          <input type="file" id="jpeg-file"></input>
+          <button  id="read-button">Start Decode</button>
+
+
         <script>
-        
-         // const url ='./test/lena.jpg';
-         // const url = './test/jpeg400jfif.jpg';
-         // const url = './test/tapa.jpg';
-         // const url = './test/subSampled/test1.jpg';
-          //const url = './test/test2g.jpg';
-          const url = './test/T(512_356).jpg';
-            const canvas = document.getElementById("canvas").getContext("2d");
-            const ctx = [canvas];
-            
-              jpeg(url,ctx);
-                 
-                
-                
-        </script>     
-              
+
+function draw(image){
+
+  var canvas = document.createElement('canvas');
+  canvas.id     = "DrawLayer";
+  canvas.width  = image[0].sof.width;
+  canvas.height = image[0].sof.height;
+	var body = document.getElementsByTagName("body")[0];
+	document.body.appendChild(canvas);
+
+	const ctx = document.getElementById("DrawLayer").getContext("2d");
+
+    const sof = image[0].sof;
+    const mcu = image[1];
+
+
+
+console.log("Drawing to canvas");
+
+let x = new Array(), y =new Array();
+
+const width = (sof.width >= sof.height)? sof.width : sof.height;
+
+const rem = ((width%8)== 0)? 0 : 8-(width%8);
+const horizontalMcuI =((rem+width)/8);// Math.round(width/8);
+
+let originY=0,originX=0;
+
+const xSub = sof.idFactorTable[1].horizontalSampleFactor * 8, ySub = sof.idFactorTable[1].verticalSampleFactor *8;
+const xSubBl = xSub/8 ;
+const remSub =  ((horizontalMcuI%xSubBl)== 0)? 0 : xSubBl-(horizontalMcuI%xSubBl);
+const horizontalMcu = horizontalMcuI+remSub;
+
+let tempOrgX = -8 , tempOrgY = 0 ;
+
+
+
+
+function updateOrigin() {
+
+
+       const oneUnit = 8 ;
+
+       tempOrgX += oneUnit;
+
+   // tempOrgY  = (tempOrgX > xSub)? 0 : tempOrgY+=oneUnit;
+
+       if ( tempOrgX >= xSub ){
+
+              tempOrgY += oneUnit;
+              tempOrgX = 0;
+
+       }
+
+       if(tempOrgY >= ySub){
+
+              tempOrgY = 0;
+
+              originX += xSub ;
+
+       }
+
+       if ( horizontalMcu <= (originX+tempOrgX)/8) {
+           originX = 0;
+           tempOrgX = 0;
+           originY += ySub;
+       }
+       /*
+       x.push(tempOrgX+originX);
+       y.push(tempOrgY+originY);
+       */
+
+
+}
+
+
+
+
+
+
+for(let x= 0; x <  mcu.length-1 ;x++){
+
+
+
+
+    updateOrigin( );
+
+
+
+for (let j= 0 ; j < 8; j++){
+
+       for(let i = 0 ; i < 8; i++){
+              ctx.fillStyle ="rgb("+mcu[x][j][i]+","+mcu[x][j][i]+","+mcu[x][j][i]+")";
+
+
+              ctx.fillRect((tempOrgX+originX+i),(tempOrgY+originY+j),1,1);
+
+
+       }
+
+
+}
+
+
+
+
+
+
+}
+
+}
+
+
+
+
+
+              function Read(file){
+
+              	let Reader= new FileReader();
+
+              	Reader.readAsArrayBuffer(file);
+
+
+              	Reader.addEventListener('loadend',()=>{
+
+              		let jpeg= new Uint8Array(Reader.result);
+
+
+
+              		const image = jpegDecode(jpeg);
+              		draw(image);
+
+              	});
+              }
+
+
+              document.getElementById("read-button").addEventListener('click',()=>{
+
+              	let file= document.getElementById("jpeg-file").files[0];
+              	Read(file);
+              	}
+              );
+
+        </script>
+
        </body>
-       
+
 </html>
